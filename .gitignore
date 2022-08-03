@@ -1,0 +1,4 @@
+
+.vscode/
+*.fdb
+*__pycache__
