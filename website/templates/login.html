@@ -1,0 +1,52 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} 
+{% block content%}
+<form method="POST">
+  <h3 align="center">Login</h3>
+  <div class="form-group">
+    <label for="email">Email Address</label>
+    <input
+      type="email"
+      class="form-control"
+      id="email"
+      name="email"
+      placeholder="Enter email"
+    />
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input
+      type="password"
+      class="form-control"
+      id="password"
+      name="password"
+      placeholder="Enter password"
+    />
+  </div>
+  <div>
+    <a href="/forgot_password">¿Forgot your password?</a>
+  </div>
+  <br />
+  <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% if google_scripts %}
+<div>
+  <label>-- or --</label>
+</div>
+<div id="g_id_onload"
+  data-client_id={{ client_id }}
+  data-context="signin"
+  data-ux_mode="popup"
+  data-login_uri="/login_google"
+  data-auto_select="true"
+  data-itp_support="true">
+</div>
+<div class="g_id_signin"
+  data-type="standard"
+  data-shape="rectangular"
+  data-theme="outline"
+  data-text="signin_with"
+  data-size="large"
+  data-logo_alignment="left">
+</div>
+{% endif %}
+{% endblock %}
