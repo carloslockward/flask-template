@@ -85,6 +85,15 @@ def login_google():
     return redirect(url_for("views.home"))
 
 
+@auth.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        # TODO: Perform password recovery
+        pass
+
+    return render_template("forgot_pass.html", user=current_user)
+
+
 @auth.route("/logout")
 @login_required
 def logout():
