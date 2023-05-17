@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from . import db, USE_GOOGLE_AUTH, GOOGLE_CLIENT_ID, WEBSITE_URL
+from .utils import send_mail, verify_reset_token
 from google.auth.transport import requests
 from google.oauth2 import id_token
+from flask_mail import Message
 from .models import User
-from . import db, USE_GOOGLE_AUTH, GOOGLE_CLIENT_ID  ##means from __init__.py import db
-
 
 auth = Blueprint("auth", __name__)
 
@@ -85,11 +86,63 @@ def login_google():
     return redirect(url_for("views.home"))
 
 
+@auth.route("/reset_password", methods=["GET", "POST"])
+def reset_password():
+    if request.method == "POST":
+        token = request.args.get("t")
+        if token:
+            user = verify_reset_token(token=token)
+            if user:
+                password1 = request.form.get("password1")
+                password2 = request.form.get("password2")
+                if password1 != password2:
+                    flash("Passwords don't match.", category="error")
+                elif len(password1) < 7:
+                    flash("Password must be at least 7 characters.", category="error")
+                else:
+                    user.password = generate_password_hash(password1, method="sha256")
+                    db.session.commit()
+                    flash("Password updated! try logging in", category="success")
+                    return redirect(url_for("auth.login"))
+        else:
+            flash("Invalid request!", category="error")
+            return redirect(request.url)
+    else:
+        token = request.args.get("t")
+        if not token:
+            flash("Invalid request!", category="error")
+            return redirect(request.url)
+        return render_template("reset_pass.html", user=None)
+
+
 @auth.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
         # TODO: Perform password recovery
-        pass
+        email = request.form.get("email")
+
+        user: User = User.query.filter_by(email=email).first()
+        if user:
+            token = user.get_reset_token()
+            msg = Message()
+            msg.subject = "App Password Reset"
+            msg.recipients = [user.email]
+            msg.sender = "no-reply@your_domain_name.com"
+            msg.body = f"""Hello {user.first_name},
+
+We received a password reset request for your account({user.email}) if you did not ask for this, please ignore this email.
+Otherwise click the link below to reset your password.
+
+http://{WEBSITE_URL}/reset_password?t={token}
+            
+            """
+
+            send_mail(msg)
+            flash(
+                "A password reset email has been sent! If you can't see it, check your spam folder.",
+                category="info",
+            )
+            return redirect(url_for("views.home"))
 
     return render_template("forgot_pass.html", user=current_user)
 
