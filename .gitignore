@@ -1,4 +1,5 @@
-
-.vscode/
+.vscode
+instance
+website/__pycache__
+website/database.db
 *.fdb
-*__pycache__

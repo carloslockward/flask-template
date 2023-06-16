@@ -1,0 +1,13 @@
+{% extends "base.html" %} 
+{% block title %}Home{% endblock %} 
+{% block content%}
+<br>
+<header id="header">
+    <h1 align="center">Coming soon</h1>
+    {% if user.is_authenticated %}
+    <p align="center">This website is under construction. Thanks for signing up! You will be notified when the site is operational.</p>
+    {% else %}
+    <p align="center">This website is under construction. <a href="/sign-up">Sign-up</a> to stay updated!</p>
+    {% endif %}
+</header>
+{% endblock %}

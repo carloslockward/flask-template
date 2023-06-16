@@ -1,13 +1,11 @@
-from flask import Blueprint
-from markdown import markdown
+from flask import Blueprint, render_template, request, flash, jsonify
+from flask_login import login_required, current_user
+from . import db
+import json
 
 views = Blueprint("views", __name__)
 
 
-@views.route("/")
+@views.route("/", methods=["GET", "POST"])
 def home():
-    return markdown(
-        """# This is a template!
-
-This template was created by `carloslockward`."""
-    )
+    return render_template("home.html", user=current_user)
