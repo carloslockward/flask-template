@@ -15,9 +15,5 @@ def send_mail(msg):
 
 
 def verify_reset_token(token) -> User:
-    try:
-        id = jwt.decode(token, key=FLASK_SECRET, algorithms=["HS256"])["reset_password"]
-    except Exception as e:
-        print(e)
-        return
+    id = jwt.decode(token, key=FLASK_SECRET, algorithms=["HS256"])["reset_password"]
     return User.query.filter_by(id=id).first()
