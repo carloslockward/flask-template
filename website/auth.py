@@ -1,8 +1,8 @@
+from . import db, USE_GOOGLE_AUTH, GOOGLE_CLIENT_ID, WEBSITE_URL, USE_RECAPTCHA, RECAPTCHA_SITE_KEY
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db, USE_GOOGLE_AUTH, GOOGLE_CLIENT_ID, WEBSITE_URL
-from .utils import send_mail, verify_reset_token
+from .utils import send_mail, verify_reset_token, verify_captcha_token
 from google.auth.transport import requests
 from google.oauth2 import id_token
 from flask_mail import Message
@@ -135,14 +135,18 @@ def forgot_password():
     if request.method == "POST":
         # TODO: Make tokens one time only
         email = request.form.get("email")
+        recaptcha_token = request.form.get("g-recaptcha-response", "")
 
         user: User = User.query.filter_by(email=email).first()
         if user:
-            token = user.get_reset_token()
-            msg = Message()
-            msg.subject = "App Password Reset"
-            msg.recipients = [user.email]
-            msg.body = f"""Hello {user.first_name},
+            if USE_RECAPTCHA and not verify_captcha_token(recaptcha_token):
+                flash("Invalid captcha!", category="error")
+            else:
+                token = user.get_reset_token()
+                msg = Message()
+                msg.subject = "App Password Reset"
+                msg.recipients = [user.email]
+                msg.body = f"""Hello {user.first_name}
 
 We received a password reset request for your account({user.email}) if you did not ask for this, please ignore this email.
 Otherwise click the link below to reset your password.
@@ -150,19 +154,24 @@ Otherwise click the link below to reset your password.
 http://{WEBSITE_URL}/reset_password?t={token}
             
             """
-            send_mail(msg)
-            flash(
-                "A password reset email has been sent! If you can't see it, check your spam folder.",
-                category="info",
-            )
-            return redirect(url_for("views.home"))
+                send_mail(msg)
+                flash(
+                    "A password reset email has been sent! If you can't see it, check your spam folder.",
+                    category="info",
+                )
+                return redirect(url_for("views.home"))
         else:
             flash(
-                "An error ocurred!",
+                "We couldn't find that account! Please verify your email address.",
                 category="error",
             )
 
-    return render_template("forgot_pass.html", user=current_user)
+    return render_template(
+        "forgot_pass.html",
+        user=current_user,
+        recaptcha_scripts=USE_RECAPTCHA,
+        recaptcha_site_key=RECAPTCHA_SITE_KEY,
+    )
 
 
 @auth.route("/logout")
@@ -180,6 +189,7 @@ def sign_up():
         last_name = request.form.get("lastName", "")
         password1 = request.form.get("password1", "")
         password2 = request.form.get("password2", "")
+        recaptcha_token = request.form.get("g-recaptcha-response", "")
 
         if email is None:
             flash("Email must not be empty!.", category="error")
@@ -197,6 +207,8 @@ def sign_up():
                 flash("Passwords don't match.", category="error")
             elif len(password1) < 7:
                 flash("Password must be at least 7 characters.", category="error")
+            elif USE_RECAPTCHA and not verify_captcha_token(recaptcha_token):
+                flash("Invalid captcha!", category="error")
             else:
                 new_user = User(
                     email=email,
@@ -215,4 +227,6 @@ def sign_up():
         user=current_user,
         google_scripts=USE_GOOGLE_AUTH,
         client_id=GOOGLE_CLIENT_ID,
+        recaptcha_scripts=USE_RECAPTCHA,
+        recaptcha_site_key=RECAPTCHA_SITE_KEY,
     )

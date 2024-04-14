@@ -1,6 +1,14 @@
-{% extends "base.html" %} {% block title %}Sign Up{% endblock %} 
+{% extends "base.html" %} {% block title %}Sign Up{% endblock %}
 {% block content %}
-<form method="POST">
+{% if recaptcha_scripts %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+  function onSubmit(token) {
+    document.getElementById("sign_up_form").submit();
+  }
+</script>
+{% endif %}
+<form id="sign_up_form" method="POST" action="?">
   <br>
   <h3 align="center">Sign Up</h3>
   <div class="form-group">
@@ -10,8 +18,7 @@
       class="form-control"
       id="email"
       name="email"
-      placeholder="Enter email"
-    />
+      placeholder="Enter email" />
   </div>
   <div class="form-group">
     <label for="firstName">First Name</label>
@@ -20,8 +27,7 @@
       class="form-control"
       id="firstName"
       name="firstName"
-      placeholder="Enter first name"
-    />
+      placeholder="Enter first name" />
   </div>
   <div class="form-group">
     <label for="lastName">Last Name</label>
@@ -30,8 +36,7 @@
       class="form-control"
       id="lastName"
       name="lastName"
-      placeholder="Enter last name"
-    />
+      placeholder="Enter last name" />
   </div>
   <div class="form-group">
     <label for="password1">Password</label>
@@ -40,8 +45,7 @@
       class="form-control"
       id="password1"
       name="password1"
-      placeholder="Enter password"
-    />
+      placeholder="Enter password" />
   </div>
   <div class="form-group">
     <label for="password2">Password (Confirm)</label>
@@ -50,31 +54,36 @@
       class="form-control"
       id="password2"
       name="password2"
-      placeholder="Confirm password"
-    />
+      placeholder="Confirm password" />
   </div>
   <br />
+  {% if recaptcha_scripts %}
+  <button type="submit" class="btn btn-primary g-recaptcha"
+    data-sitekey='{{ recaptcha_site_key }}'
+    data-callback="onSubmit">Submit</button>
+  {% else %}
   <button type="submit" class="btn btn-primary">Submit</button>
+  {% endif %}
 </form>
 {% if google_scripts %}
 <div>
   <label>-- or --</label>
 </div>
 <div id="g_id_onload"
-     data-client_id={{ client_id }}
-     data-context="signup"
-     data-ux_mode="popup"
-     data-login_uri="/login_google"
-     data-auto_select="true"
-     data-itp_support="true">
+  data-client_id={{ client_id }}
+  data-context="signup"
+  data-ux_mode="popup"
+  data-login_uri="/login_google"
+  data-auto_select="true"
+  data-itp_support="true">
 </div>
 <div class="g_id_signin"
-     data-type="standard"
-     data-shape="rectangular"
-     data-theme="outline"
-     data-text="signup_with"
-     data-size="large"
-     data-logo_alignment="left">
+  data-type="standard"
+  data-shape="rectangular"
+  data-theme="outline"
+  data-text="signup_with"
+  data-size="large"
+  data-logo_alignment="left">
 </div>
 {% endif %}
 {% endblock %}

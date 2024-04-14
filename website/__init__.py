@@ -7,9 +7,15 @@ db = SQLAlchemy()
 mail = Mail()
 
 DB_NAME = "database.db"
-FLASK_SECRET = "Your secret key here!" # REPLACE with your google client_id when app is live.
-USE_GOOGLE_AUTH = True # CONFIG Turn off if you dont want to use google OAuth
-GOOGLE_CLIENT_ID = "Your google client_id here!" # REPLACE with your google client_id when app is live.
+FLASK_SECRET = "Your secret key here!"  # REPLACE with your google client_id when app is live.
+
+USE_GOOGLE_AUTH = True  # CONFIG Turn off if you dont want to use google OAuth
+GOOGLE_CLIENT_ID = "Your google client_id here!"  # REPLACE with your google client_id when app is live.
+
+USE_RECAPTCHA = True  # CONFIG Turn off if you dont want to use recaptcha.
+RECAPTCHA_SITE_KEY = "Your recaptcha site key here!"  # REPLACE with your recaptcha site key.
+RECAPTCHA_SECRET_KEY = "Your recaptcha secret key here!"  # REPLACE with your recaptcha secret key.
+
 WEBSITE_URL = "localhost:5000"  # REPLACE with your domain name when app is in production.
 
 
@@ -20,9 +26,9 @@ def create_app():
     app.config["MAIL_SERVER"] = "smtp.gmail.com"
     app.config["MAIL_PORT"] = 587
     app.config["MAIL_USE_TLS"] = True
-    app.config["MAIL_DEFAULT_SENDER"] = "no-reply@website.com" # REPLACE
-    app.config["MAIL_USERNAME"] = "your_email_here@gmail.com" # REPLACE
-    app.config["MAIL_PASSWORD"] = "your password here" # REPLACE
+    app.config["MAIL_DEFAULT_SENDER"] = "no-reply@website.com"  # REPLACE
+    app.config["MAIL_USERNAME"] = "your_email_here@gmail.com"  # REPLACE
+    app.config["MAIL_PASSWORD"] = "your password here"  # REPLACE
     db.init_app(app)
     mail.init_app(app)
 
