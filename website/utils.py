@@ -31,8 +31,6 @@ def verify_captcha_token(token) -> bool:
             res.raise_for_status()
             if not res.json()["success"]:
                 print(f'Error verifying captcha: {res.json()["error-codes"]}')
-            else:
-                print(f"Recaptcha token verification success!\n{res.text}")
             return res.json()["success"]
         except Exception as e:
             print(f"Captcha request failed with: {e}\n {traceback.format_exc()}")
